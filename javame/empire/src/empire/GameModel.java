@@ -1,5 +1,5 @@
 /*
- * @(#)GameModel.java	1.18 00/05/26
+ * @(#)GameModel.java	
  */
 package empire;
 
@@ -183,8 +183,8 @@ public class GameModel  {
       default:
     }
 
-    if (    newX >=0 && newX < (width-1) 
-         && newY >=0 && newY < (height-1)
+    if (    newX >=0 && newX < width 
+         && newY >=0 && newY < height
        )
     {
       if ( otherPlayerTerritory( currentPlayer, newX, newY ) == false )
@@ -203,6 +203,7 @@ public class GameModel  {
         currentPlayer.setNumberOfMoves( (byte)(numberOfMoves - 1) );
         if ( numberOfMoves == 0 )
         {
+    System.out.println( currentPlayer.getNumberOfMoves() );
           nextPlayer();
           view.nextPlayer( currentPlayer );
         }
