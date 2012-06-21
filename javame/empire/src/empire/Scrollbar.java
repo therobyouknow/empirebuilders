@@ -25,9 +25,6 @@ public class Scrollbar
   Scrollbar( int topLeftX, int topLeftY, int thickness, int length, int orientation, 
              int value, int visible, int minimum, int maximum )
   {
-    System.out.println( "value:"+value + " visible:" + visible + " minimum:" + minimum + " maximum:" + maximum );
-
-
     this.topLeftX = topLeftX;
     this.topLeftY = topLeftY;
     this.thickness = thickness;
@@ -47,11 +44,6 @@ public class Scrollbar
 
   void draw( Graphics g )
   {
-
-    System.out.println( "visible:" + visible + " maximum:" + maximum );
-
-    
- 
     if ( orientation == HORIZONTAL )
     {
       g.setColor( 0xFFFFFF );
@@ -63,7 +55,6 @@ public class Scrollbar
                   (visible * (length - margin * 2))/maximum,
                   thickness-margin * 2
                 );
-      System.out.println( "v/m:" + visible/maximum );
     }
 
     if ( orientation == VERTICAL )
