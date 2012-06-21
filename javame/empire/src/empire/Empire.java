@@ -28,30 +28,21 @@ public class Empire extends MIDlet implements CommandListener
   private Command exitCommand = new Command("Exit", Command.EXIT, 60);
   private Command aboutCommand = new Command("Help", Command.HELP, 30);
   public Command gameOverCommand = new Command("Game Over", Command.HELP, 10);
-
   private static final String[] mainMenuOptions = { "Play The Game", "How To Play" };
   private List mainMenu = new List("Empire",
                                     List.IMPLICIT,
                                     mainMenuOptions,
                                     null);
 
-  private static final String[] yesNoDialogOptions = { "No", "Yes" };
-  private List yesNoDialog = new List("Are you sure?", List.IMPLICIT, yesNoDialogOptions, null );
-  private boolean areYouSure = false;
-
-  ProgressScreen progressScreen = new ProgressScreen( "Progress" ); 
-
   private Player winner = null;
 
   private static String howToPlay =
-    "You must try to cover land squares on the landscape. "
+    "You must try to cover ?? squares on the landscape. "
   + "On each go a die is rolled which determines the number of moves for that player. " 
   + "When you cover a square, it changes to your colour. "
   + "The other player cannot move over you, or your squares. "
-  + "But both of you can move over the sea. "  
-  + "The number of squares you need to cover is shown on your turn."
-  + "This number goes down each time you cover a square."
-  + "The winner is the player whose number reaches zero first."
+  + "But both of you can move over the sea. "
+  + "You must stop your opponent from getting 150 squares. "
   + "Your own squares act as walls that the other player cannot pass through.\n"
   + "Copyright (c) Robert J. Davis 2002";
 
@@ -85,10 +76,7 @@ public class Empire extends MIDlet implements CommandListener
   public void startApp() 
   {
     mainMenu.addCommand(exitCommand);
-    progressScreen.addCommand(exitCommand);
-    progressScreen.setCommandListener(this);
     mainMenu.setCommandListener(this) ;
-    yesNoDialog.setCommandListener(this) ;
     display.setCurrent(mainMenu);
   }
 
@@ -116,37 +104,24 @@ public class Empire extends MIDlet implements CommandListener
   {
     if ( c == List.SELECT_COMMAND )
     {
-      if ( areYouSure == false )
-      {
-        int pos = mainMenu.getSelectedIndex();
-        if ( pos == 1 )
-        {
-          showHowToPlay();
-        }
-  
-        if ( pos == 0 )
-        {
-          view.addCommand(view.help);
-          view.init();
+      int pos = mainMenu.getSelectedIndex();
+      System.out.println( pos );
 
-          gameLogic.getLandscape().setProgress( progressScreen );
-          display.setCurrent(progressScreen);
-          progressScreen.ready();
-          gameLogic.start();
-        }
-      }
-      else
+      if ( pos == 1 )
       {
-        int pos = yesNoDialog.getSelectedIndex();
-        areYouSure = false;
-        if ( pos == 0 )
-        {
-          display.setCurrent( view ); return;
-        }
-        else if ( pos == 1 )
-        {
-          display.setCurrent( mainMenu ); return;
-        }
+        showHowToPlay();
+      }
+  
+      if ( pos == 0 )
+      {
+        //view.addCommand(view.subMenuCommand);
+        view.addCommand(view.inGamePlayExitCommand);
+
+	  view.setCommandListener(this);
+        view.init();
+
+        gameLogic.start();
+        display.setCurrent(view); 
       }
     }
     else if ( c == exitCommand )
@@ -159,23 +134,17 @@ public class Empire extends MIDlet implements CommandListener
     }
     else if ( c == view.inGamePlayExitCommand )
     {
-      areYouSure = true;
-      display.setCurrent( yesNoDialog ); return;
+      // go back to main menu
+      System.out.println("in game exit");
+      display.setCurrent( mainMenu );
     }
-    else if ( c == view.help )
+    else if ( c == view.subMenuCommand )
     {
-      showHowToPlay();
     }
     else if ( c == gameOverCommand )
     {
       gameOver();
       display.setCurrent( mainMenu );
-    }
-    else if ( c == ProgressScreen.progressComplete )
-    {
-        view.addCommand(view.inGamePlayExitCommand);
-	  view.setCommandListener(this);
-        display.setCurrent(view); 
     }
     else
     {

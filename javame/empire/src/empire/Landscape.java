@@ -22,12 +22,6 @@ public class Landscape
 
   private Random random = null;
  
-  // future editions to this class will employ abstract interface to
-  // decouple from any particular progress indicator dialog
-  private ProgressScreen progress = null;
-
-  public void setProgress( ProgressScreen progress ) { this.progress = progress; }
-
   public void setRandom( Random random ) { this.random = random; }
 
   public int getWidth() { return width; }
@@ -110,7 +104,6 @@ public class Landscape
 
     while( numberOfLandscapeUnits < numberOfLandSqrs )
     {
-      progress.setValue( ( numberOfLandscapeUnits * 100 ) / numberOfLandSqrs  );
       // adding a landscape unit, so make sure that
       // the location where it is being added is not already land
       // to ensure that the correct number of landscape units is created
@@ -137,7 +130,6 @@ public class Landscape
       if (positionY < 0) positionY = 0;
       if (positionY > (height-1)) positionY = height-1;
     }
-    progress.done();
   }
 
   public void setDimensions(int w, int h)

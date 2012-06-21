@@ -1,0 +1,22 @@
+Notes on Empire Builders Game
+
+1) Object of the game
+You must try to cover 150 squares on the landscape.
+
+You can either be red player, or green player - it's your choice.
+
+On each go a die is rolled which determines the number of moves
+for that player.
+
+When you cover a square, it changes to your colour - red or green. The other player cannot move over you, or your squares.
+
+But both of you can move over the sea.
+
+You must stop your opponent from getting 150 squares. Your own squares act as walls that the other player cannot pass through.
+
+2) Notes on port to small monochrome display.
+Game first written for computers running Acorn RISC OS 2.00 and above.
+When porting to J2ME, will use hatching patterns to represent different colours
+and only display quarter of the landscape at any one time.
+
+3) Copyright (c) Robert J. Davis 2002

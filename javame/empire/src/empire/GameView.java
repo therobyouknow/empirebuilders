@@ -46,7 +46,7 @@ class GameView extends Canvas // implements CommandListener
   int landscapeWindowSizeY = 0;
 
   public Command inGamePlayExitCommand = new Command("Exit", Command.EXIT, 60);
-  public Command help = new Command("Help", Command.HELP, 30);
+  public Command subMenuCommand = new Command("Menu", Command.HELP, 30);
 
   // use array and initialise object to be used and reused to be deterministic
   private final int maxQueueLength = 10;

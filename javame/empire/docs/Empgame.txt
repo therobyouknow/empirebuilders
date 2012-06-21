@@ -1,0 +1,306 @@
+   10REM > Empire Builders
+   20REM   Version 4.00
+   30REM   on Wed,28 Dec 1988.17:46:15
+   40REM   Written by Robert James Davis
+   50REM   Modified for RISC OS on Wed,26 Apr 1989.18:17:55
+   60REM   Modified again for RISC OS on Sat,29 Apr 1989.22:53:12
+   70REM - Now able to run from RISC OS DeskTop
+   80:
+   90REM*DIR :0.$.APPS.!Empire.!Empire
+  100*SLOAD EmpSpr
+  120:
+  140*TV249,1
+  150PROCinitialise_variables
+  160PROCstart
+  170*TV0,1
+  180MODE13
+  181PRINTTAB(0,29);
+  190PROCinitialise_game
+  200PROCgame
+  210END
+  220:
+  230DEFPROCgame
+  240REPEAT
+  250FORgo%=1TOhowmany%
+  260PROCrandom_dice(go%)
+  261*SCREENSAVE EMPSCRNSHT
+  270PROCmoves(go%)
+  280NEXT
+  290UNTIL0
+  300ENDPROC
+  310:
+  320DEFPROCmoves(player%)
+  330REPEAT
+  340Move$=GET$
+  350IFMove$=LEFT$(keys$(player%),1) PROCshift(player%,-1,0)
+  360IFMove$=MID$(keys$(player%),2,1) PROCshift(player%,1,0)
+  370IFMove$=MID$(keys$(player%),3,1) PROCshift(player%,0,1)
+  380IFMove$=RIGHT$(keys$(player%),1) PROCshift(player%,0,-1)
+  390UNTILmoves%(player%)=0
+  400ENDPROC
+  410:
+  420DEFPROCshift(p%,x%,y%)
+  430tempx%(p%)=playerx%(p%)
+  440tempy%(p%)=playery%(p%)
+  450playerx%(p%)=playerx%(p%)+x%
+  460playery%(p%)=playery%(p%)+y%
+  470IFplayerx%(p%)<1 playerx%(p%)=1:GOTO560
+  480IFplayerx%(p%)>xgcol% playerx%(p%)=xgcol%:GOTO560
+  490IFplayery%(p%)<1 playery%(p%)=1:GOTO560
+  500IFplayery%(p%)>ygcol% playery%(p%)=ygcol%:GOTO560
+  510IFarea%(playerx%(p%),playery%(p%))<>0 AND area%(playerx%(p%),playery%(p%))<>1 AND area%(playerx%(p%),playery%(p%))<>1+p% playerx%(p%)=tempx%(p%):playery%(p%)=tempy%(p%):GOTO560
+  520moves%(p%)=moves%(p%)-1
+  530PROCplot(vtemp%(p%),tempx%(p%),tempy%(p%))
+  540PROCclaim_land(p%)
+  550PROCscore
+  560PROCplot(3+p%,playerx%(p%),playery%(p%))
+  570PROCdice(player%)
+  580ENDPROC
+  590:
+  600END
+  610DEFPROCboard
+  620:
+  630sq%=0
+  640:
+  650PROCrnd
+  660REPEAT
+  670IF area%(px%,py%)=0 area%(px%,py%)=1:sq%=sq%+1
+  680IFRND(100)=1 PROCrnd
+  690px%=px%+RND(3)-2
+  700py%=py%+RND(3)-2
+  710:
+  720px%=px%+(px%>xgcol%)
+  730px%=px%+ABS( (px%<1) )
+  740py%=py%+(py%>ygcol%)
+  750py%=py%+ABS( (py%<1) )
+  760:
+  770UNTILsq%=425
+  780:
+  790FOR y%=1 TO ygcol%
+  800FOR x%=1 TO xgcol%
+  810VDU23,27,0,area%(x%,y%)|
+  820PLOT&ED,x%*36-36,y%*36-36
+  830NEXT,
+  840ENDPROC
+  850n:
+  860DEFPROCrnd
+  870px%=RND(xgcol%)
+  880py%=RND(ygcol%)
+  890ENDPROC
+  900:
+  910DEFPROCinitialise_game
+  920VDU23;8202;0;0;0;
+  930howmany%=2
+  940PROClegends
+  950PROCboard
+  960PROCplot_players_randomly
+  961*SCREENSAVE ESCRNSHT
+  970ENDPROC
+  980:
+  990DEFPROCplot(type%,posx%,posy%)
+ 1000VDU23,27,0,type%|
+ 1010PLOT&ED,posx%*36-36,posy%*36+32
+ 1020area%(posx%,posy%)=type%
+ 1030ENDPROC
+ 1040:
+ 1050DEFPROCscore
+ 1060FORnp%=1TOhowmany%
+ 1070IFFNfinish(score%(np%)) CLEAR:GOTO140
+ 1080score$=STR$(score%(np%))
+ 1090score$=STRING$(3-LENscore$,"0")+score$
+ 1100FORn%=0TOLENscore$ -1
+ 1110IFnp%=1 OSCLI"SCH.rnumber"+STR$(ASCMID$(score$,n%+1,1)-48) ELSEOSCLI"SCH.gnumber"+STR$(ASCMID$(score$,n%+1,1)-48)
+ 1120IFnp%=1 PLOT&ED,268+n%*64,916 ELSE PLOT&ED,n%*64+968,916
+ 1130NEXT
+ 1140NEXT
+ 1150ENDPROC
+ 1160:
+ 1170DEFPROClegends
+ 1180*SCH.red
+ 1190PLOT&ED,28,916
+ 1200*SCH.green
+ 1210PLOT&ED,576,916
+ 1220ENDPROC
+ 1230:
+ 1240DEFPROCplot_players_randomly
+ 1250playerx%(1)=RND(xgcol%):playery%(1)=RND(ygcol%)
+ 1260playerx%(2)=playerx%(1)+(RND(9)-5)
+ 1270playery%(2)=playery%(1)+(RND(9)-5)
+ 1280IFplayerx%(2)<1 OR playerx%(2)>xgcol% ORplayery%(2)<1 ORplayery%(2)>ygcol% PROCplot_players_randomly
+ 1290IFplayerx%(1)=playerx%(2) AND playery%(1)=playery%(2) GOTO1250
+ 1300FORp%=1TO2
+ 1310PROCclaim_land(p%)
+ 1320PROCscore
+ 1330PROCplot(3+p%,playerx%(p%),playery%(p%))
+ 1340NEXT
+ 1350ENDPROC
+ 1360:
+ 1370DEFPROCinitialise_variables
+ 1371xgcol%=35:ygcol%=22
+ 1380DIMscore%(2),playerx%(2),playery%(2),area%(xgcol%,ygcol%),keys$(2),moves%(2),vtemp%(2),tempx%(2),tempy%(2)
+ 1390keys$(1)="ZXFC"
+ 1400keys$(2)=",.'/"
+ 1410ENDPROC
+ 1420:
+ 1430DEFPROCrandom_dice(player%)
+ 1440FORr%=1TO6
+ 1450FORd%=1TO8:WAIT:NEXT
+ 1460moves%(player%)=RND(6)
+ 1470PROCdice(player%)
+ 1480NEXT
+ 1490ENDPROC
+ 1500:
+ 1510DEFPROCdice(d%)
+ 1520IFd%=1 THENppos%=476:cd$="rdice" ELSE ppos%=1176:cd$="gdice"
+ 1530IFmoves%(d%)=0 GCOL0,0 TINT 0:RECTANGLE FILL ppos%,920,80,80:ENDPROC
+ 1540OSCLI"SCH."+cd$+STR$(moves%(d%))
+ 1550PLOT&ED,ppos%,920
+ 1560ENDPROC
+ 1570:
+ 1580DEFPROCclaim_land(d%)
+ 1590vtemp%(d%)=area%(playerx%(d%),playery%(d%))
+ 1600IFvtemp%(d%)=1 vtemp%(d%)=1+d%:score%(d%)+=1
+ 1610IFvtemp%(d%)=4 OR vtemp%(d%)=5 THEN vtemp%(d%)=1+d%:score%(d%)+=1
+ 1620ENDPROC
+ 1630:
+ 1640DEFPROCstart
+ 1650*TV249,1
+ 1660MODE13
+ 1670VDU23;8202;0;0;0;
+ 1680*SCH.TITLE
+ 1690PLOT&ED,224,916
+ 1700PROClettering("By Robert J. Davis",10,3,2,52)
+ 1710PROClettering("Select one of the following below by",0,5,4,8)
+ 1720PROClettering("moving the mouse to move the pointer.",0,6,4,8)
+ 1730PROClettering("Then press a mouse button to confirm",0,7,4,8)
+ 1740PROClettering("your choice.",0,8,4,8)
+ 1750*POINTER
+ 1760MOUSE COLOUR 2,0,0,240
+ 1770MOUSE COLOUR 1,0,0,160
+ 1780PROClettering("INSTRUCTIONS",13,10,58,62)
+ 1790PROClettering("LOOK AT THE CONTROLS",9,12,35,3)
+ 1800PROClettering("PLAY THE GAME",12.8,14,36,48)
+ 1810REPEAT
+ 1820MOUSEmousex%,mousey%,buttons%
+ 1830FORopt%=0TO2
+ 1840IFmousey%>=((opt%*2)+16)*32 ANDmousey%<=((opt%*2)+16)*32+40 option%=opt%
+ 1850NEXT
+ 1860UNTILbuttons%<>0
+ 1870IFoption%=2 PROCinstructions:GOTO1650
+ 1880IFoption%=1 PROCcontrols:GOTO1650
+ 1890ENDPROC
+ 1900:
+ 1910DEFPROClettering(text$,tx,ty,col1%,col2%)
+ 1920tx=32*tx
+ 1930ty=(31-ty)*32
+ 1940MOVEtx,ty
+ 1950GCOLcol1%
+ 1960VDU5
+ 1970PRINTtext$
+ 1980MOVEtx+4,ty+4
+ 1990GCOLcol2%
+ 2000PRINTtext$
+ 2010VDU4
+ 2020ENDPROC
+ 2030:
+ 2040DEFPROCinstructions
+ 2050*TV0,1
+ 2060MODE13
+ 2070PROClettering("INSTRUCTIONS",14,1,15,48)
+ 2080VDU23;8202;0;0;0;
+ 2090RESTORE 2830
+ 2100p%=3
+ 2110REPEAT
+ 2120READs$
+ 2130PROClettering(s$,0,p%,48,3)
+ 2140p%=p%+1
+ 2150UNTILs$=" "
+ 2160*FX15
+ 2170REPEATUNTILGET=32
+ 2180*TV247,1
+ 2190MODE13
+ 2200VDU23;8202;0;0;0;
+ 2210PROClettering("THE GAME OBJECTS",12,0,12,56)
+ 2220*SCH.0
+ 2230PLOT&ED,0,872
+ 2240PROClettering("- SEA",2,3,48,56)
+ 2250*SCH.1
+ 2260PLOT&ED,0,808
+ 2270PROClettering("- LAND",2,5,21,42)
+ 2280*SCH.2
+ 2290PLOT&ED,512,872
+ 2300PROClettering("- RED PLAYER SQUARE",18,3,2,3)
+ 2310*SCH.3
+ 2320PLOT&ED,512,808
+ 2330PROClettering("- GREEN PLAYER SQUARE",18,5,8,12)
+ 2340*SCH.4
+ 2350PLOT&ED,0,744
+ 2360PROClettering("- RED PLAYER",2,7,2,3)
+ 2370*SCH.5
+ 2380PLOT&ED,512,744
+ 2390PROClettering("- GREEN PLAYER",18,7,8,12)
+ 2400PROClettering("Press the SPACE bar",10.5,10,34,36)
+ 2410*FX15
+ 2420REPEATUNTILGET=32
+ 2430ENDPROC
+ 2440:
+ 2450DEFFNfinish(final%)
+ 2460IFfinal%<150 THEN=FALSE
+ 2470CLS
+ 2480*SCH.WELLDONE
+ 2490FORx%=40TO1239STEP600
+ 2500FORy%=0TO920STEP92
+ 2510PLOT&ED,x%,y%
+ 2520NEXT,
+ 2530REPEAT
+ 2540VDU19;24,RND(15)*16,RND(15)*16,RND(15)*16
+ 2550WAIT:WAIT:WAIT
+ 2560UNTILINKEY(1)=32
+ 2570CLS
+ 2580=TRUE
+ 2590DEFPROCcontrols
+ 2600*TV0,1
+ 2610MODE13
+ 2620VDU23;8202;0;0;0;
+ 2630PROClettering("CONTROLS",15,5,15,48)
+ 2640PROClettering("DIRECTION :",0,8,15,48)
+ 2650PROClettering("LEFT",0,10,12,3)
+ 2660PROClettering("RIGHT",0,12,12,3)
+ 2670PROClettering("UP",0,14,12,3)
+ 2680PROClettering("DOWN",0,16,12,3)
+ 2690PROClettering("RED PLAYER",13,8,2,3)
+ 2700PROClettering("GREEN PLAYER",26,8,8,12)
+ 2710PROClettering(LEFT$(keys$(1),1),17,10,2,3)
+ 2720PROClettering(MID$(keys$(1),2,1),17,12,2,3)
+ 2730PROClettering(MID$(keys$(1),3,1),17,14,2,3)
+ 2740PROClettering(RIGHT$(keys$(1),1),17,16,2,3)
+ 2750PROClettering(LEFT$(keys$(2),1),31,10,8,12)
+ 2760PROClettering(MID$(keys$(2),2,1),31,12,8,12)
+ 2770PROClettering(MID$(keys$(2),3,1),31,14,8,12)
+ 2780PROClettering(RIGHT$(keys$(2),1),31,16,8,12)
+ 2790PROClettering("Press the SPACE bar to continue",4,19,19,56)
+ 2800REPEATUNTILGET=32
+ 2810ENDPROC
+ 2820:
+ 2830DATA "The object of the game :"
+ 2840DATA "  "
+ 2850DATA "You must try to cover 150 squares on the"
+ 2860DATA "landscape."
+ 2870DATA "  "
+ 2880DATA "You can either be red player, or green"
+ 2890DATA "player - it's your choice."
+ 2900DATA "  "
+ 2910DATA "When you cover a square, it changes to"
+ 2920DATA "your colour - red or green."
+ 2930DATA "the other player cannot move over you,"
+ 2940DATA "or your squares."
+ 2950DATA "  "
+ 2960DATA "But both of you can move over the sea."
+ 2970DATA "  "
+ 2980DATA "You must stop your opponent from getting"
+ 2990DATA "150 squares. Your own squares act as"
+ 3000DATA "walls that the other player cannot pass"
+ 3010DATA "through."
+ 3020DATA "  "
+ 3030DATA "Press the SPACE bar to see game objects"
+ 3040DATA " "

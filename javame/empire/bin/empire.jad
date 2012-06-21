@@ -1,5 +1,5 @@
 MIDlet-1: empire, /icons/Empire.png, empire.Empire
-MIDlet-Jar-Size: 28107
+MIDlet-Jar-Size: 26414
 MIDlet-Jar-URL: empire.jar
 MIDlet-Name: empire
 MIDlet-Vendor: Sun Microsystems

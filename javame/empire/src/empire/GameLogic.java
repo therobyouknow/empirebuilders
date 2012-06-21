@@ -61,7 +61,6 @@ public class GameLogic
   }
 
 
-  public Landscape getLandscape() { return landscape; }
   public Player getCurrentPlayer() { return currentPlayer; }
   public int getNumberOfPlayers() { return players.length; }
 
